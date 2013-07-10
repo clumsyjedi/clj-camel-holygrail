@@ -16,4 +16,5 @@
   (let [[host port] (clojure.string/split conn-str #":")
         port (Long. port)
         conn-factory (HornetQConnectionFactory/makeConnectionFactory host port)
-        jms-config (JmsConfiguration. conn-factory)]))
+        jms-config (JmsConfiguration. conn-factory)]
+    (JmsComponent. jms-config)))

@@ -20,14 +20,16 @@
 
 (def http-uri-header (Exchange/HTTP_URI))
 (def http-path-header (Exchange/HTTP_PATH))
+(def in-only (ExchangePattern/InOnly))
+(def in-out (ExchangePattern/InOut))
 
 
 (defn make-context
   "Create and start a DefaultCamelContext. Arguments are scheme -> component mappings"
   [& components]
   (let [context (DefaultCamelContext.)]
-    (doseq [[scheme component] components]
-      (.addComponent context scheme component))
+    (doseq [[scheme component] (apply hash-map components)]
+      (.addComponent context (name scheme) component))
     (.start context)
     context))
 
@@ -101,16 +103,6 @@
    (if (empty? body)
      `(DefaultErrorHandlerBuilder.)
      `(.. (DefaultErrorHandlerBuilder.) ~@body))))
-
-
-
-(defprotocol Splitter
-  (split [this body]))
-
-(defmacro splitter [& body]
-  `(reify Splitter
-    (split [this body]
-      ~@body)))
 
 (defmacro expression
   "Create a new Expression with the forms provided as the evaluate method"
