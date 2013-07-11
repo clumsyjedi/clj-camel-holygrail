@@ -5,7 +5,6 @@
   (let [matches (re-seq #"[a-zA-Z0-9]+" (lower-case s))]
     (join "" (cons (first matches) (map capitalize (rest matches))))))
 
-
 (defn- sym-to-camel-case [sym]
   (symbol (to-camel-case (name sym))))
 

@@ -14,12 +14,18 @@
            [org.apache.camel.processor RecipientList]
            [org.apache.camel.model.language HeaderExpression]
            [org.apache.camel.model.language SimpleExpression]
-           [org.apache.camel.impl DefaultProducerTemplate])
+           [org.apache.camel.impl DefaultProducerTemplate]
+           [uk.co.and.dailymail.hornetq HornetQConnectionFactory]
+           [org.apache.activemq.camel.component ActiveMQComponent]
+           [org.apache.camel.component.jms JmsConfiguration]
+           [org.apache.camel.component.jms JmsComponent]
+           [org.apache.camel.util CamelLogger] )
   (:require [clojure.tools.logging :as log]
             [holygrail.util :as util]))
 
 (def http-uri-header (Exchange/HTTP_URI))
 (def http-path-header (Exchange/HTTP_PATH))
+(def exception-caught-header (Exchange/EXCEPTION_CAUGHT))
 (def in-only (ExchangePattern/InOnly))
 (def in-out (ExchangePattern/InOut))
 
@@ -41,6 +47,7 @@
     (fn [dest body]
       (.sendBody producer dest body))))
 
+(declare processor)
 (defmacro defroute
   "Creates a route from the provided context, error handler and body"
   [context err-handler & body]
@@ -50,6 +57,22 @@
                    (configure []
                      (.errorHandler ~'this ~err-handler)
                      (.. ~'this ~@body))))))
+; components
+(defn activemq-component
+  "Create an ActiveMQComponent and add it to the context"
+  [conn-str]
+  (ActiveMQComponent/activeMQComponent conn-str))
+
+
+(defn hornetq-component
+  "Create a hornetq JmsComponent and add it to the context"
+  [conn-str]
+  (let [[host port] (clojure.string/split conn-str #":")
+        port (Long. port)
+        conn-factory (HornetQConnectionFactory/makeConnectionFactory host port)
+        jms-config (JmsConfiguration. conn-factory)]
+    (JmsComponent. jms-config)))
+
 ; helper functions
 (defn set-in-body [ex body]
   "Set the message body"
@@ -82,6 +105,11 @@
   "Useful for getting state inside processors"
   [ex]
   (.. ex (getIn) (getHeaders)))
+
+(defn get-exception
+  "get the last caught exception from the message"
+  [ex]
+  (.getException ex))
 
 ; types and builders
 
@@ -149,12 +177,15 @@
   "Logs a bit of info about the message"
   []
   (processor
-   (log/info "------------------------------------------")
-   (log/info "From endpoint:"   (.. ex getFromEndpoint getEndpointUri))
-   (log/info "Input headers:"   (.. ex getIn getHeaders))
-   (log/info "Input body type:" (type (.. ex getIn getBody)))
-   (log/info "Input body:"      (.. ex getIn getBody))
-   (log/info "------------------------------------------")))
+   (log/warn "------------------------------------------")
+   (log/warn "From endpoint:"   (.. ex getFromEndpoint getEndpointUri))
+   (log/warn "Input headers:"   (.. ex getIn getHeaders))
+   (log/warn "Input body type:" (type (.. ex getIn getBody)))
+   (log/warn "Input body:"      (.. ex getIn getBody))
+   (log/warn "Is Failed?:"      (.isFailed ex))
+   (log/warn "Exception"        (.getException ex))
+   (log/warn "Caught Exception" (get-header ex exception-caught-header))
+   (log/warn "------------------------------------------")))
 
 (defn forced-failure-processor
   "Throws an exception"
