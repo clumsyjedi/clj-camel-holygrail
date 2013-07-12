@@ -7,3 +7,12 @@
 
 (defn received-exchanges [end]
   (.getReceivedExchanges end))
+
+(defn countdown-latch [n]
+  (java.util.concurrent.CountDownLatch. n))
+
+(defn wait [latch timeout]
+  (.await latch timeout java.util.concurrent.TimeUnit/MILLISECONDS))
+
+(defn countdown [latch]
+  (.countDown latch))

@@ -46,10 +46,32 @@
 
       (defroute context
         :err-handler (dead-letter-channel "mock:dlq"
-                      (maximum-redeliveries 2))
+                      (maximum-redeliveries 0))
         (from "direct:source")
         (process (processor (throw (Exception. "foo")))))
 
       ((make-producer context) "direct:source" "body")
       (received-counter (make-endpoint context "mock:dlq"))
+      => 1)))
+
+(facts "Guaranteed delivery EIP"
+  (fact "guaranteed delivery using file"
+    (let [context (make-context)
+          latch (countdown-latch 1)]
+
+      (defroute context
+        (from "direct:source")
+        (to "file:/tmp/clj-camel-holygrail-tests"))
+
+      (defroute context
+        (from "file:/tmp/clj-camel-holygrail-tests?move=.done")
+        (pipeline)
+        (to "mock:dest")
+        (process (processor (countdown latch))))
+
+      ((make-producer context) "direct:source" "file-body")
+
+      (wait latch 5000)
+
+      (received-counter (make-endpoint context "mock:dest"))
       => 1)))

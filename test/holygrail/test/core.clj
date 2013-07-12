@@ -9,7 +9,7 @@
         produce (make-producer context)
         counter (atom 0)]
     (defroute context
-      :err-handler (default-error-handler-builder)
+      :err-handler (default-error-handler)
       (from "direct:test")
       (process (processor
                 (swap! counter inc))))
