@@ -1,6 +1,6 @@
-(def camel-version "2.10.3")
+(def camel-version "2.11.0")
 
-(defproject clj-camel-holygrail "0.1.0" 
+(defproject clj-camel-holygrail "0.2.0" 
   :description "Apache Camel DSL in Clojure"
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.apache.camel/camel-core ~camel-version]
@@ -20,4 +20,5 @@
                  :shell ["./bin/release.sh"]}
   :profiles {:dev {:dependencies [[midje "1.5.1"]
                                   [midje-junit-formatter "0.1.0-SNAPSHOT"]]
-                   :plugins [[lein-midje "3.0.0"]]}})
+                   :plugins [[lein-midje "3.0.0"]]
+  }})

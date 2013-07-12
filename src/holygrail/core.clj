@@ -12,6 +12,7 @@
            [org.apache.camel.processor SendProcessor]
            [org.apache.camel.processor.aggregate AggregationStrategy]
            [org.apache.camel.processor RecipientList]
+           [org.apache.camel.processor ErrorHandler]
            [org.apache.camel.model.language HeaderExpression]
            [org.apache.camel.model.language SimpleExpression]
            [org.apache.camel.impl DefaultProducerTemplate]
@@ -50,8 +51,9 @@
 (declare processor)
 (defmacro defroute
   "Creates a route from the provided context, error handler and body"
-  [context err-handler & body]
-  (let [body (map util/java-method body)]
+  [context & args]
+  (let [[err-handler & body] (util/route-args args)
+        body (map util/java-method body)]
     `(.addRoutes ~context
                  (proxy [RouteBuilder] []
                    (configure []

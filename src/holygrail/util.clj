@@ -10,3 +10,8 @@
 
 (defn java-method [form]
   (cons (sym-to-camel-case (first form)) (rest form)))
+
+(defn route-args [args]
+  (if (= :err-handler (first args))
+    (cons (second args) (drop 2 args))
+    (cons nil args)))
