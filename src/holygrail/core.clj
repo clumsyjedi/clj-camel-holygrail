@@ -17,6 +17,7 @@
            [org.apache.camel.model.language HeaderExpression]
            [org.apache.camel.model.language SimpleExpression]
            [org.apache.camel.impl DefaultProducerTemplate]
+           [org.apache.camel.impl DefaultConsumerTemplate]
            [uk.co.and.dailymail.hornetq HornetQConnectionFactory]
            [org.apache.activemq.camel.component ActiveMQComponent]
            [org.apache.camel.component.jms JmsConfiguration]
@@ -41,13 +42,26 @@
     (.start context)
     context))
 
+(defn make-consumer
+  "Create and start a DefaultConsumerTemplate"
+  [context]
+  (let [consumer (DefaultConsumerTemplate. context)]
+    (.start consumer)
+    (fn [dest & {:keys [timeout]}]
+
+      (if timeout
+          (.receiveBody consumer dest timeout)
+          (.receiveBodyNoWait consumer dest)))))
+
 (defn make-producer
   "Create and start a DefaultProducerTemplate"
   [context]
   (let [producer (DefaultProducerTemplate. context)]
     (.start producer)
-    (fn [dest body]
-      (.sendBody producer dest body))))
+    (fn [dest body & {:keys [ex-pattern] :or {ex-pattern in-only}}]
+      (if (= in-only ex-pattern)
+        (.sendBody producer dest body)
+        (.requestBody producer dest body (.class Object))))))
 
 (defmacro defroute
   "Creates a route from the provided context, error handler and body"
@@ -122,7 +136,6 @@
   (.getException ex))
 
 ; types and builders
-
 (defn default-message []
   (DefaultMessage.))
 
