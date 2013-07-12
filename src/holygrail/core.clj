@@ -6,6 +6,7 @@
            [org.apache.camel Expression]
            [org.apache.camel.impl DefaultCamelContext]
            [org.apache.camel.impl DefaultExchange]
+           [org.apache.camel.impl DefaultMessage]
            [org.apache.camel.builder RouteBuilder]
            [org.apache.camel.builder DeadLetterChannelBuilder]
            [org.apache.camel.builder DefaultErrorHandlerBuilder]
@@ -48,7 +49,6 @@
     (fn [dest body]
       (.sendBody producer dest body))))
 
-(declare processor)
 (defmacro defroute
   "Creates a route from the provided context, error handler and body"
   [context & args]
@@ -77,12 +77,16 @@
 
 ; helper functions
 (defn set-in-body [ex body]
-  "Set the message body"
+  "Set the in message body"
   (.. ex (getIn) (setBody body)))
 
 (defn set-out-body [ex body]
   "Set the out message body"
   (.. ex (getOut) (setBody body)))
+
+(defn set-body [ex body]
+  "Set the in message body"
+  (set-in-body ex body))
 
 (defn get-body [ex]
   "get the message body as a string"
@@ -114,6 +118,11 @@
   (.getException ex))
 
 ; types and builders
+(defn endpoint [context url]
+  (.getEndpoint context url))
+
+(defn default-message []
+  (DefaultMessage.))
 
 (defmacro predicate
   "Creates a predicate for use in a camel/when clause"

@@ -4,6 +4,16 @@
         [midje.sweet]
         [holygrail.test-util]))
 
+(facts "Message Channel EIP"
+  (fact "message channel"
+    (instance? org.apache.camel.Endpoint
+               (endpoint (make-context) "mock:endpoint"))))
+
+(facts "Message EIP"
+  (fact "message channel"
+    (instance? org.apache.camel.impl.DefaultMessage
+               (default-message))))
+
 (facts "Pipeline EIP"
   (fact "pipeline of endpoints"
     (let [context (make-context)]
@@ -13,6 +23,20 @@
         (pipeline (into-array ["mock:a" "mock:b" "mock:c"])))
 
       ((make-producer context) "direct:source" "msg")
-      (received-counter (mock-endpoint context "mock:a")) => 1
-      (received-counter (mock-endpoint context "mock:b")) => 1
-      (received-counter (mock-endpoint context "mock:c")) => 1)))
+      (received-counter (endpoint context "mock:a")) => 1
+      (received-counter (endpoint context "mock:b")) => 1
+      (received-counter (endpoint context "mock:c")) => 1))
+
+  (fact "pipeline of processors"
+    (let [context (make-context)]
+      (defroute context
+        (from "direct:source")
+        (process (processor (set-body ex "a")))
+        (process (processor (set-body ex (str (get-body ex) "b"))))
+        (process (processor (set-body ex (str (get-body ex) "c"))))
+        (to "mock:dest"))
+
+      ((make-producer context) "direct:source" "msg")
+      (let [mock-dest (endpoint context "mock:dest")]
+        (received-counter mock-dest) => 1
+        (get-body (first (received-exchanges mock-dest))) => "abc"))))
