@@ -86,3 +86,9 @@
       (let [mock-dest (make-endpoint context "mock:dest")]
         (received-counter mock-dest) => 1
         (get-body (first (received-exchanges mock-dest))) => "new body"))))
+
+
+(facts "Message Endpoint EIP"
+  (fact "message endpoint"
+    (instance? org.apache.camel.Endpoint
+               (make-endpoint (make-context) "mock:endpoint"))))
