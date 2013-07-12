@@ -59,6 +59,10 @@
                    (configure []
                      (.errorHandler ~'this ~err-handler)
                      (.. ~'this ~@body))))))
+
+(defn make-endpoint [context url]
+  (.getEndpoint context url))
+
 ; components
 (defn activemq-component
   "Create an ActiveMQComponent and add it to the context"
@@ -118,8 +122,6 @@
   (.getException ex))
 
 ; types and builders
-(defn endpoint [context url]
-  (.getEndpoint context url))
 
 (defn default-message []
   (DefaultMessage.))

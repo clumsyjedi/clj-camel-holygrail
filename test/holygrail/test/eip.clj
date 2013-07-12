@@ -7,7 +7,7 @@
 (facts "Message Channel EIP"
   (fact "message channel"
     (instance? org.apache.camel.Endpoint
-               (endpoint (make-context) "mock:endpoint"))))
+               (make-endpoint (make-context) "mock:endpoint"))))
 
 (facts "Message EIP"
   (fact "message channel"
@@ -23,9 +23,9 @@
         (pipeline (into-array ["mock:a" "mock:b" "mock:c"])))
 
       ((make-producer context) "direct:source" "msg")
-      (received-counter (endpoint context "mock:a")) => 1
-      (received-counter (endpoint context "mock:b")) => 1
-      (received-counter (endpoint context "mock:c")) => 1))
+      (received-counter (make-endpoint context "mock:a")) => 1
+      (received-counter (make-endpoint context "mock:b")) => 1
+      (received-counter (make-endpoint context "mock:c")) => 1))
 
   (fact "pipeline of processors"
     (let [context (make-context)]
@@ -37,6 +37,6 @@
         (to "mock:dest"))
 
       ((make-producer context) "direct:source" "msg")
-      (let [mock-dest (endpoint context "mock:dest")]
+      (let [mock-dest (make-endpoint context "mock:dest")]
         (received-counter mock-dest) => 1
         (get-body (first (received-exchanges mock-dest))) => "abc"))))
