@@ -75,3 +75,25 @@
 
       (received-counter (make-endpoint context "mock:dest"))
       => 1)))
+
+(facts "Message Bus EIP"
+  (fact "message bus - decouple pub sub"
+    (let [pub-context (make-context)
+          sub-context (make-context)
+          latch (countdown-latch 1)]
+
+      (defroute pub-context
+        (from "direct:source")
+        (to "vm:pub-output"))
+
+      (defroute sub-context
+        (from "vm:pub-output")
+        (pipeline)
+        (to "mock:dest")
+        (process (processor (countdown latch))))
+
+      ((make-producer pub-context) "direct:source" "body")
+
+      (wait latch 5000)
+      (received-counter (make-endpoint sub-context "mock:dest"))
+      => 1)))
