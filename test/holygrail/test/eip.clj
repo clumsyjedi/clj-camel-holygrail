@@ -40,3 +40,24 @@
       (let [mock-dest (make-endpoint context "mock:dest")]
         (received-counter mock-dest) => 1
         (get-body (first (received-exchanges mock-dest))) => "abc"))))
+
+
+(facts "Message Router EIP"
+  (fact "message router with predicates"
+    (let [context (make-context)]
+      (defroute context
+        (from "direct:source")
+        (choice)
+        (when (predicate (= (get-body ex) "a")))
+        (to "mock:a")
+        (when (predicate (= (get-body ex) "b")))
+        (to "mock:b")
+        (otherwise)
+        (to "mock:c")
+        (end))
+
+     (doseq [x '("a" "b" "c")]
+        ((make-producer context) "direct:source" x)
+        (let [mock-dest (make-endpoint context (str "mock:" x))]
+          (received-counter mock-dest) => 1
+          (get-body (first (received-exchanges mock-dest))) => x)))))
