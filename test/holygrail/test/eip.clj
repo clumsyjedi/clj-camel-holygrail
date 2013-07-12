@@ -61,3 +61,28 @@
         (let [mock-dest (make-endpoint context (str "mock:" x))]
           (received-counter mock-dest) => 1
           (get-body (first (received-exchanges mock-dest))) => x)))))
+
+(facts "Message Translator EIP"
+  (fact "message router with processors"
+    (let [context (make-context)]
+      (defroute context
+        (from "direct:source")
+        (process (processor (set-body ex "new body")))
+        (to "mock:dest"))
+
+      ((make-producer context) "direct:source" "old body")
+      (let [mock-dest (make-endpoint context "mock:dest")]
+        (received-counter mock-dest) => 1
+        (get-body (first (received-exchanges mock-dest))) => "new body")))
+
+  (fact "message router with expressions"
+    (let [context (make-context)]
+      (defroute context
+        (from "direct:source")
+        (transform (expression "new body"))
+        (to "mock:dest"))
+
+      ((make-producer context) "direct:source" "old body")
+      (let [mock-dest (make-endpoint context "mock:dest")]
+        (received-counter mock-dest) => 1
+        (get-body (first (received-exchanges mock-dest))) => "new body"))))
