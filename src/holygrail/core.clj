@@ -58,8 +58,8 @@
   [context]
   (let [producer (DefaultProducerTemplate. context)]
     (.start producer)
-    (fn [dest body & {:keys [ex-pattern] :or {ex-pattern in-only}}]
-      (if (= in-only ex-pattern)
+    (fn [dest body & {:keys [exchange-pattern] :or {exchange-pattern in-only}}]
+      (if (= in-only exchange-pattern)
         (.sendBody producer dest body)
         (.requestBody producer dest body (.class Object))))))
 
@@ -82,7 +82,6 @@
   "Create an ActiveMQComponent and add it to the context"
   [conn-str]
   (ActiveMQComponent/activeMQComponent conn-str))
-
 
 (defn hornetq-component
   "Create a hornetq JmsComponent and add it to the context"
@@ -146,13 +145,13 @@
      (matches [self ex]
        ~@body)))
 
-(defmacro dead-letter-channel-builder [queue & body]
+(defmacro dead-letter-channel [queue & body]
   (let [body (map util/java-method body)]
    (if (empty? body)
      `(DeadLetterChannelBuilder. ~queue)
      `(.. (DeadLetterChannelBuilder. ~queue) ~@body))))
 
-(defmacro default-error-handler-builder [& body]
+(defmacro default-error-handler [& body]
   (let [body (map util/java-method body)]
    (if (empty? body)
      `(DefaultErrorHandlerBuilder.)
