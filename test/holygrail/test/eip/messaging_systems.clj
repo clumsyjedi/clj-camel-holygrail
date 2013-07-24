@@ -10,7 +10,7 @@
                (make-endpoint (make-context) "mock:endpoint"))))
 
 (facts "Message EIP"
-  (fact "message channel"
+  (fact "default message"
     (instance? org.apache.camel.impl.DefaultMessage
                (default-message))))
 

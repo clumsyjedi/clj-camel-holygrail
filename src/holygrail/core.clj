@@ -58,10 +58,14 @@
   [context]
   (let [producer (DefaultProducerTemplate. context)]
     (.start producer)
-    (fn [dest body & {:keys [exchange-pattern] :or {exchange-pattern in-only}}]
+    (fn [dest body & {:keys [exchange-pattern headers]
+                      :or {exchange-pattern in-only headers {}}}]
       (if (= in-only exchange-pattern)
-        (.sendBody producer dest body)
+        (.sendBodyAndHeaders producer dest body (zipmap (map name (keys headers)) (vals headers)))
         (.requestBody producer dest body (.class Object))))))
+
+(defn make-endpoint [context url]
+  (.getEndpoint context url))
 
 (defmacro defroute
   "Creates a route from the provided context, error handler and body"
@@ -73,9 +77,6 @@
                    (configure []
                      (.errorHandler ~'this ~err-handler)
                      (.. ~'this ~@body))))))
-
-(defn make-endpoint [context url]
-  (.getEndpoint context url))
 
 ; components
 (defn activemq-component
