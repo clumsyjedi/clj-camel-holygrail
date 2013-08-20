@@ -86,10 +86,10 @@
 
 (defn hornetq-component
   "Create a hornetq JmsComponent and add it to the context"
-  [conn-str]
+  [conn-str timeout]
   (let [[host port] (clojure.string/split conn-str #":")
         port (Long. port)
-        conn-factory (HornetQConnectionFactory/makeConnectionFactory host port)
+        conn-factory (HornetQConnectionFactory/makeConnectionFactory host port timeout)
         jms-config (JmsConfiguration. conn-factory)]
     (JmsComponent. jms-config)))
 
