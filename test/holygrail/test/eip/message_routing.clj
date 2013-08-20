@@ -39,3 +39,22 @@
 
       (received-counter mock-dest) => 1
       (get-body (first (received-exchanges mock-dest))) => "a")))
+
+
+(facts "Dynamic Router EIP"
+  (fact "Dynamic router with clojure expression"
+    (let [context (make-context)
+          produce (make-producer context)
+          mock-dest-a (make-endpoint context "mock:dest")
+          mock-dest-b (make-endpoint context "mock:dest")
+          counter (atom 0)]
+      (defroute context
+        (from "direct:source")
+        (dynamic-router (expression (swap! counter inc)
+                                    (if (> @counter 1))
+                                    (get-header ex :dest))))
+
+      (produce "direct:source" "a" :headers {:dest "mock:a" :routed false})
+      (produce "direct:source" "b" :headers {:dest "mock:b" })
+
+      (received-counter mock-dest-a) => 1)))
