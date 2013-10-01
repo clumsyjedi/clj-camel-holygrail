@@ -18,7 +18,6 @@
            [org.apache.camel.model.language SimpleExpression]
            [org.apache.camel.impl DefaultProducerTemplate]
            [org.apache.camel.impl DefaultConsumerTemplate]
-           [uk.co.and.dailymail.hornetq HornetQConnectionFactory]
            [org.apache.activemq.camel.component ActiveMQComponent]
            [org.apache.camel.component.jms JmsConfiguration]
            [org.apache.camel.component.jms JmsComponent]
@@ -83,15 +82,6 @@
   "Create an ActiveMQComponent and add it to the context"
   [conn-str]
   (ActiveMQComponent/activeMQComponent conn-str))
-
-(defn hornetq-component
-  "Create a hornetq JmsComponent and add it to the context"
-  [conn-str timeout]
-  (let [[host port] (clojure.string/split conn-str #":")
-        port (Long. port)
-        conn-factory (HornetQConnectionFactory/makeConnectionFactory host port timeout)
-        jms-config (JmsConfiguration. conn-factory)]
-    (JmsComponent. jms-config)))
 
 ; helper functions
 (defn set-in-body [ex body]

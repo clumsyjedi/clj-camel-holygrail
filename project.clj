@@ -8,7 +8,6 @@
                  [org.apache.camel/camel-jms ~camel-version]
                  [org.apache.activemq/activemq-camel "5.8.0"]
                  [org.jboss.netty/netty "3.2.7.Final"]
-                 [uk.co.and.dailymail/hornetq-connector "1.1"]
                  [org.clojure/tools.logging "0.2.6"]]
   :source-paths ["src"]
   :repositories {"snapshots" {:url "http://10.251.76.32:8081/nexus/content/repositories/snapshots"
