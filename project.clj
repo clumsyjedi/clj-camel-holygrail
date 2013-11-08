@@ -1,6 +1,6 @@
 (def camel-version "2.11.0")
 
-(defproject clj-camel-holygrail "0.3.1" 
+(defproject clj-camel-holygrail "0.3.2" 
   :description "Apache Camel DSL in Clojure"
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [org.apache.camel/camel-core ~camel-version]
